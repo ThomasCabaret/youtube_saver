@@ -23,7 +23,7 @@ import os
 import json
 import time
 import argparse
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from googleapiclient.discovery import build
 
 # LOAD SETTINGS
@@ -53,7 +53,8 @@ quota_usage = 0
 state = {'confirm_all': False}
 
 def iso_to_datetime(iso_str):
-    return datetime.strptime(iso_str, '%Y-%m-%dT%H:%M:%SZ')
+    # Minimal change: attach UTC timezone to the parsed datetime
+    return datetime.strptime(iso_str, '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=timezone.utc)
 
 def should_scrape(video_id):
     path = os.path.join(DATA_DIR, f'{video_id}.json')
@@ -64,7 +65,7 @@ def should_scrape(video_id):
         with open(path, 'r', encoding='utf-8') as f:
             data = json.load(f)
         scraped_at = iso_to_datetime(data.get('scraped_at', '1970-01-01T00:00:00Z'))
-        if datetime.utcnow() - scraped_at > timedelta(days=SCRAPE_INTERVAL_DAYS):
+        if datetime.now(timezone.utc) - scraped_at > timedelta(days=SCRAPE_INTERVAL_DAYS):
             print(f'UPDATE: {video_id} (older than {SCRAPE_INTERVAL_DAYS}d)')
             return True
         else:
@@ -77,7 +78,7 @@ def should_scrape(video_id):
 def save_video_data(video_id, metadata, comments):
     data = {
         'video_id': video_id,
-        'scraped_at': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+        'scraped_at': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
         'title': metadata['snippet']['title'],
         'description': metadata['snippet']['description'],
         'published_at': metadata['snippet']['publishedAt'],
