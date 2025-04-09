@@ -182,8 +182,10 @@ def main():
 
     auto_yes = args.yes_to_all
     video_ids = get_all_video_ids(auto_yes)
-    print(f'Found {len(video_ids)} videos.')
-    for video_id in video_ids:
+    total_videos = len(video_ids)
+    print(f'Found {total_videos} videos.')
+    for idx, video_id in enumerate(video_ids, start=1):
+        print(f"\nProcessing video {idx}/{total_videos} (Quota used: {quota_usage}/{ESTIMATED_DAILY_QUOTA} daily)")
         if not should_scrape(video_id):
             continue
         try:
@@ -193,10 +195,11 @@ def main():
                 continue
             comments = get_video_comments(video_id, auto_yes)
             save_video_data(video_id, metadata, comments)
-            print(f'SAVED: {video_id}')
+            print(f'SAVED: {video_id} (Quota used: {quota_usage}/{ESTIMATED_DAILY_QUOTA} daily)')
             time.sleep(1)
         except Exception as e:
             print(f'ERROR: {video_id} (exception: {e})')
+    print(f"\nRun completed. Total quota used: {quota_usage}/{ESTIMATED_DAILY_QUOTA} daily.")
 
 if __name__ == '__main__':
     main()
