@@ -1,0 +1,7 @@
+{
+  "api_key": "YOUR_API_KEY_HERE",
+  "channel_id": "YOUR_CHANNEL_ID_HERE",
+  "data_dir": "data/videos",
+  "scrape_interval_days": 7,
+  "estimated_daily_quota": 10000
+}
